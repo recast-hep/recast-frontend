@@ -1,0 +1,1495 @@
+<?php
+// $Id$
+
+define('RECAST_REQUEST_INCOMPLETE', 0);
+define('RECAST_REQUEST_ACTIVE', 1);
+define('RECAST_REQUEST_INPROGRESS', 2);
+define('RECAST_REQUEST_COMPLETED', 3);
+define('RECAST_REQUEST_CANCELLED', 9);
+
+/**
+* Implementationation of hook_menu().
+*/
+function recast_menu() {
+  $items = array();
+
+  $items['node/%node/listsubscriptions'] = array(
+  'title' => 'List Subscriptions',
+  'page callback' => 'recast_list_subscribers',
+  'page arguments' => array(1),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_analysis_nodes_only',
+  'access arguments' => array(1,'list'),
+  'weight'  => 10,
+  );
+
+  $items['node/%node/listrequests'] = array(
+  'title' => 'List Requests',
+  'page callback' => 'recast_list_requests',
+  'page arguments' => array(1),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_analysis_nodes_only',
+  'access arguments' => array(1,'list'),
+  'weight'  => 11,
+  );
+
+  $items['node/%node/request/add'] = array(
+  'title' => 'Add Request',
+  'page callback' => 'recast_add_request',
+  'page arguments' => array(1),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_analysis_nodes_only',
+  'access arguments' => array(1,'add'),
+  'weight'  => 12,
+  );
+
+  $items['node/%node/subscribe/add'] = array(
+  'title' => 'Subscribe',
+  'page callback' => 'recast_add_subscription',
+  'page arguments' => array(1),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_analysis_subscription_add',
+  'access arguments' => array(1),
+  'weight'  => 13,
+  );
+
+  $items['node/%node/subscribe/remove'] = array(
+  'title' => 'Un-Subscribe',
+  'page callback' => 'recast_remove_subscription',
+  'page arguments' => array(1),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_analysis_subscription_remove',
+  'access arguments' => array(1),
+  'weight'  => 14,
+  );
+
+  $items['node/%node/request/accept'] = array(
+  'title' => 'Accept Request',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('recast_accept_confirm_form'),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_recast',
+  'access arguments' => array(1,'accept'),
+  'weight'  => 15,
+  );
+
+  $items['node/%node/request/accept/comment'] = array(
+  'title' => 'Accept Request',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('recast_request_comment_form'),
+  'type' => MENU_CALLBACK,
+  'access callback' => TRUE,
+  'weight'  => 16,
+  );
+
+  $items['node/%node/request/decline'] = array(
+  'title' => 'Decline Request',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('recast_accept_confirm_form'),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_recast',
+  'access arguments' => array(1,'decline'),
+  'weight'  => 17,
+  );
+
+  $items['node/%node/request/decline/comment'] = array(
+  'title' => 'Decline Request',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('recast_request_comment_form'),
+  'type' => MENU_CALLBACK,
+  'access callback' => TRUE,
+  'weight'  => 18,
+  );
+
+  $items['node/%node/request/cancel'] = array(
+  'title' => 'Accept Request',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('recast_cancel_confirm_form'),
+  'type' => MENU_CALLBACK,
+  'access callback' => 'accesschk_recast',
+  'access arguments' => array(1,'cancel'),
+  );
+
+  $items['node/%node/request/contact'] = array(
+  'title' => 'Contact Requester',
+  'page callback' => 'recast_contact_member',
+  'page arguments' => array(1),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_recast',
+  'access arguments' => array(1,'contact'),
+  'weight'  => 19,
+  );
+
+  $items['node/%node/request/respond'] = array(
+  'title' => 'Upload Response',
+  'page callback' => 'recast_add_response',
+  'page arguments' => array(1),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_recast',
+  'access arguments' => array(1,'respond'),
+  'weight'  => 20,
+  );
+
+  $items['node/%node/request/results'] = array(
+  'title' => 'Show Results',
+  'page callback' => 'recast_list_results',
+  'page arguments' => array(1,'results'),
+  'type' => MENU_LOCAL_TASK,
+  'access callback' => 'accesschk_recast',
+  'access arguments' => array(1,'results'),
+  'weight'  => 21,
+  );
+
+  $items['node/%node/request_edit'] = array(
+  'title' => 'Edit',
+  'type' => MENU_LOCAL_TASK,
+  'page callback' => 'recast_show_edit_request_form',
+  'page arguments' => array(1),
+  'access callback' => 'accesschk_recast',
+  'access arguments' => array(1,'edit'),
+  );
+
+  $items['node/%node/request/confirm/accept'] = array(
+  'title' => 'Approve Confirmation for request',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('recast_confirm_form'),
+  'type' => MENU_CALLBACK,
+  'access callback' => TRUE,
+  'weight' => 25,
+  );
+
+  $items['recast/login'] = array(
+  'title' => t('Login'),
+  'description' => 'Account',
+  'page callback' => 'drupal_goto',
+  'page arguments' => array('user/login'),
+  'access callback' => 'user_is_anonymous',
+  'type' => MENU_NORMAL_ITEM,
+  'menu_name' => 'user-menu',
+  );
+
+  $items['myaccount'] = array(
+  'title' => t('My Account'),
+  'description' => 'Member Account',
+  'page callback' => 'drupal_goto',
+  'page arguments' => array('user'),
+  'access callback' => 'user_is_logged_in',
+  'type' => MENU_NORMAL_ITEM,
+  'menu_name' => 'user-menu',
+  );
+
+  $items['recast/claim_ownership'] = array(
+  'title' => 'Claim Analysis Ownership AJAX Handler',
+  'page callback' => 'recast_claim_ownership',
+  'type' => MENU_CALLBACK,
+  'access callback' => TRUE
+  );
+
+
+  return $items;
+}
+
+
+function recast_show_edit_request_form($node) {
+
+  global $user;
+
+  if( !function_exists("node_form")) {
+    module_load_include('inc', 'node', 'node.pages');
+  }
+
+  if( !function_exists("field_collection_item_form_validate")) {
+    module_load_include('inc', 'field_collection', 'field_collection.pages');
+  }
+
+  $form = drupal_get_form('recast_request_node_form', $node);
+
+  $output = drupal_render($form);
+  return $output;
+
+
+}
+
+
+/**
+* Implements hook_views_api().
+*/
+function recast_views_api() {
+  return array(
+  'api' => 3.0,
+  'path' => drupal_get_path('module', 'recast') . '/views',
+  );
+}
+
+
+function accesschk_analysis_nodes_only($node,$option) {
+  if ($node->type == 'analysis') {
+    if ($option == 'list' AND arg(2) != 'edit') {
+      RETURN TRUE;
+    } elseif (user_is_logged_in() AND arg(2) != 'edit') {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+  } else {
+    return FALSE;
+  }
+}
+
+function accesschk_analysis_subscription_add($node) {
+  global $user;
+  if (user_is_logged_in() AND $node->type == 'analysis') {
+    if (arg(2) != 'edit') {
+      // Check and see if user has already subscribed to this analysis - only show if not
+      if (recast_check_subscription($node)) {
+        return FALSE;
+      } else {
+        return  TRUE;
+      }
+    } else {
+      return FALSE;
+    }
+  } else {
+    return FALSE;
+  }
+}
+
+function accesschk_analysis_subscription_remove($node) {
+  global $user;
+  if (user_is_logged_in() AND $node->type == 'analysis') {
+    if (arg(2) != 'edit') {
+      // Check and see if user has already subscribed to this analysis - only show if they are
+      return recast_check_subscription($node);
+    } else {
+      return FALSE;
+    }
+  } else {
+    return FALSE;
+  }
+}
+
+
+
+
+function accesschk_recast($node,$option) {
+  global $user;
+
+
+  if ($node->type == 'recast_request' AND arg(2) != 'edit' AND user_is_logged_in()) {
+    // Check and see what the request audience is All or Selective
+    $user_is_target = recast_user_in_audience($node);
+
+    if ($user_is_target AND ($option == 'accept' OR $option == 'decline')) {
+      if (in_array($node->field_request_status[LANGUAGE_NONE][0]['value'], array(RECAST_REQUEST_ACTIVE, RECAST_REQUEST_INPROGRESS, RECAST_REQUEST_COMPLETED))) {
+
+        // Check and see if user is a subscriber of type provider
+        if (!recast_check_subscription($node)) {
+          return FALSE;
+        } else if(recast_check_subscription($node,'provider')) {
+            // Check and see if we already have a request response for this user
+            $query = new EntityFieldQuery();
+            $entity = $query->entityCondition('entity_type', 'node', '=')
+            ->entityCondition('bundle', 'recast_response')
+            ->propertyCondition('status', 1, '=')
+            ->propertyCondition('uid', $user->uid, '=')
+            ->fieldCondition('field_result_request', 'target_id',  $node->nid, '=', 0)
+            ->execute();
+            if (isset($entity['node'])) {
+              return FALSE;
+            } else {
+              return TRUE;
+            }
+          }
+      }
+      return FALSE;
+
+    } else if ($option == 'contact') {
+        $account = user_load($node->uid);
+
+        // Anonymous users cannot have contact forms.
+        if (!$account->uid) {
+          return FALSE;
+        }
+
+        // User administrators should always have access to personal contact forms.
+        if (user_access('administer users')) {
+        return TRUE;
+      }
+
+      // If the requested user has disabled their contact form, or this preference
+      // has not yet been saved, do not allow users to contact them.
+      if (empty($account->data['contact'])) {
+        return FALSE;
+      }
+
+      // If requested user has been blocked, do not allow users to contact them.
+      if (empty($account->status)) {
+        return FALSE;
+      }
+
+      return user_access('access user contact forms');
+
+    } else if ($option == 'respond') {
+        // Has this user accepted this recast request
+        $query = new EntityFieldQuery();
+        $entity = $query->entityCondition('entity_type', 'node', '=')
+        ->entityCondition('bundle', 'recast_response')
+        ->propertyCondition('status', 1, '=')
+        ->propertyCondition('uid', $user->uid, '=')
+        ->fieldCondition('field_result_request', 'target_id',  $node->nid, '=', 0)
+        ->fieldCondition('field_result_status', 'value',  'accepted', '=', 0)
+        ->execute();
+        if (isset($entity['node']) AND $node->field_request_status[LANGUAGE_NONE][0]['value'] != RECAST_REQUEST_CANCELLED) {
+          return TRUE;
+        } else {
+          return FALSE;
+        }
+      } elseif ($option == 'results') {
+        /* Do we have any completed responses */
+        $query = new EntityFieldQuery();
+        $count = $query->entityCondition('entity_type', 'node', '=')
+        ->entityCondition('bundle', 'recast_response')
+        ->propertyCondition('status', 1, '=')
+        //->propertyCondition('uid', $user->uid, '=')
+        ->fieldCondition('field_result_request', 'target_id',  $node->nid, '=', 0)
+        ->fieldCondition('field_result_status', 'value',  'declined', '!=', 0)
+        ->count()->execute();
+        if ($count > 0) {
+          return TRUE;
+        } else {
+          return FALSE;
+        }
+
+      } elseif ($option == 'edit') {
+        if (isset($user->roles) AND in_array('recast_admins',array_values($user->roles))) {
+          return TRUE;
+        } else if ($node->uid == $user->uid AND $node->field_request_status[LANGUAGE_NONE][0]['value'] == RECAST_REQUEST_INCOMPLETE) {
+          return TRUE;
+        } else {
+          return FALSE;
+        }
+
+      } else if ($option == 'cancel') {
+        if ($node->uid == $user->uid) {
+          return TRUE;
+        } else {
+          return FALSE;
+        }
+      }
+
+  } elseif ($option == 'results' AND $node->type == 'recast_request' AND arg(2) != 'edit') {
+    /* Do we have any completed responses */
+    $query = new EntityFieldQuery();
+    $count = $query->entityCondition('entity_type', 'node', '=')
+    ->entityCondition('bundle', 'recast_response')
+    ->propertyCondition('status', 1, '=')
+    //->propertyCondition('uid', $user->uid, '=')
+    ->fieldCondition('field_result_request', 'target_id',  $node->nid, '=', 0)
+    ->fieldCondition('field_result_status', 'value',  'declined', '!=')
+    ->count()->execute();
+    if ($count > 0) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+
+  } elseif ($node->type == 'recast_request' AND $option  == 'edit') {
+    // See if user owns this request and status is still inactive
+    if (isset($user->roles) AND in_array('recast_admins',array_values($user->roles))) {
+      return TRUE;
+    } else if ($node->uid == $user->uid AND $node->field_request_status[LANGUAGE_NONE][0]['value'] == RECAST_REQUEST_INCOMPLETE) {
+          return TRUE;
+    } else {
+      return FALSE;
+    }
+
+  } else {
+    return FALSE;
+  }
+
+}
+
+
+/* Confirm form for request accept/decline */
+function recast_accept_confirm_form($form, &$form_state) {
+
+  $nid = arg(1);
+  $mode = arg(3);
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => $nid,
+  );
+  $form['mode'] = array(
+    '#type' => 'hidden',
+    '#value' => $mode,
+  );
+  if ($mode == 'accept') {
+      $question = t('Accept Request');
+      $description = t('Do you really want to accept this request?');
+      $confirm_btn = t('Yes');
+  } else if ($mode == 'decline') {
+      $question = t('Decline Request');
+      $description = t('Do you really want to decline this request?');
+      $confirm_btn = t('Yes');
+  }
+
+  return confirm_form($form, $question, "node/$nid", $description, $confirm_btn );
+
+}
+
+/* Save a new Recast Result node record and set the node status to accepted or declined
+We create a recast_response node regardless if the subscriber accepts or not for tracking
+
+Set the node title and related recast request id
+We are using the auto_nodetitle module and had the setting in the content type enabled
+for it to auto generate a title and hit this bug: http://drupal.org/node/1192216
+We don't really need auto title on so with it disabled for this content type, we are good.
+*/
+function recast_accept_confirm_form_submit($form, &$form_state) {
+  $node = node_load($form_state['values']['nid']);
+  if ($form_state['values']['mode'] == 'accept') {
+    $newnode = new stdClass();
+    $newnode->type = 'recast_response';
+    $newnode->title = "Response for Request #{$node->title}";
+    $newnode->language = LANGUAGE_NONE;
+    node_object_prepare($newnode);
+    $newnode->field_result_request[LANGUAGE_NONE][0]['target_id'] = $node->nid;
+    $newnode->field_result_status[LANGUAGE_NONE][0]['value'] = 'accepted';
+    node_save($newnode);
+
+    if ($node->field_request_status[LANGUAGE_NONE][0]['value'] == RECAST_REQUEST_ACTIVE) {
+      $node->field_request_status[LANGUAGE_NONE][0]['value'] = RECAST_REQUEST_INPROGRESS;
+      $node->field_request_status_log[LANGUAGE_NONE][0]['value'] .= '<br>' . format_date(time(),'medium') . ' - In Progress';
+      node_save($node);
+    }
+
+    $form_state['redirect'] = "node/{$node->nid}/request/accept/comment";
+
+  } elseif ($form_state['values']['mode'] == 'decline') {
+
+    $newnode = new stdClass();
+    $newnode->type = 'recast_response';
+    $newnode->title = "Response for Request #{$node->title}";
+    $newnode->language = LANGUAGE_NONE;
+    node_object_prepare($newnode);
+    $newnode->field_result_request[LANGUAGE_NONE][0]['target_id'] = $node->nid;
+    $newnode->field_result_status[LANGUAGE_NONE][0]['value'] = 'declined';
+    node_save($newnode);
+
+    $form_state['redirect'] = "node/{$node->nid}/request/accept/comment";
+
+  }
+
+}
+
+/* Confirm form for request cancel */
+function recast_cancel_confirm_form($form, &$form_state) {
+
+  $nid = arg(1);
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => $nid,
+  );
+  $question = t('Cancel Request');
+  $description = t('Do you really want to cancel this request?');
+  $confirm_btn = t('Yes');
+  return confirm_form($form, $question, "node/$nid", $description, $confirm_btn );
+}
+
+function recast_cancel_confirm_form_submit($form, &$form_state) {
+  $node = node_load($form_state['values']['nid']);
+  if (in_array($node->field_request_status[LANGUAGE_NONE][0]['value'], array(RECAST_REQUEST_ACTIVE,RECAST_REQUEST_INPROGRESS,RECAST_REQUEST_COMPLETED))) {
+    $node->field_request_status[LANGUAGE_NONE][0]['value'] = RECAST_REQUEST_CANCELLED;
+    $node->field_request_status_log[LANGUAGE_NONE][0]['value'] .= '<br>' . format_date(time(),'medium') . ' - Cancelled';
+    node_save($node);
+    drupal_set_message('Request was cancelled');
+  }
+  $form_state['redirect'] = "node/{$node->nid}";
+
+}
+
+
+function recast_list_subscribers() {
+  $view = views_get_view('recast_subscriptions');
+  $args = array();
+  $args[0] = arg(1);
+  return $view->preview('page_2', $args);
+
+}
+
+function recast_list_requests() {
+  $view = views_get_view('recast_requests');
+  $args = array();
+  $args[0] = arg(1);
+  return $view->preview('page_2', $args);
+}
+
+function recast_list_results() {
+  $view = views_get_view('recast_results');
+  $args = array();
+  $args[0] = arg(1);
+  return $view->preview('attachment_1', $args);
+
+}
+
+function recast_add_subscription($node) {
+  global $user;
+
+  if( !function_exists("node_form")) {
+    module_load_include('inc', 'node', 'node.pages');
+  }
+
+  $node = new StdClass();
+  $node->uid = $user->uid;
+  $node->name = $user->name;
+  $node->type = 'subscription';
+  $node->language = '';
+  node_object_prepare($node);
+
+  $form = drupal_get_form('subscription_node_form', $node);
+
+  $output = drupal_render($form);
+  return $output;
+
+}
+
+function recast_remove_subscription($node) {
+  global $user;
+  $query = new EntityFieldQuery();
+  $entity = $query->entityCondition('entity_type', 'node', '=')
+  ->entityCondition('bundle', 'subscription')
+  ->propertyCondition('status', 1, '=')
+  ->propertyCondition('uid', $user->uid, '=')
+  ->fieldCondition('field_subscription_analysis', 'target_id',  $node->nid, '=', 0)
+  ->execute();
+
+  if (isset($entity['node'])) {
+    $nid = key($entity['node']);
+    if ($nid > 0) {
+      node_delete($nid);
+      drupal_set_message('Subscription has been removed');
+      if (arg(4) == 'analyses-catalog') {
+        drupal_goto("analyses-catalog");
+      } else {
+        drupal_goto("node/{$node->nid}");
+      }
+    }
+  }
+}
+
+
+
+
+function recast_add_response($node) {
+  global $user;
+
+  if( !function_exists("node_form")) {
+    module_load_include('inc', 'node', 'node.pages');
+  }
+
+  // Retrieve the users response record if they accepted this recast request
+  $query = new EntityFieldQuery();
+  $entity = $query->entityCondition('entity_type', 'node', '=')
+  ->entityCondition('bundle', 'recast_response')
+  ->propertyCondition('status', 1, '=')
+  ->propertyCondition('uid', $user->uid, '=')
+  ->fieldCondition('field_result_request', 'target_id',  $node->nid, '=', 0)
+  ->fieldCondition('field_result_status', 'value',  'accepted', '=', 0)
+  ->execute();
+  if (isset($entity['node'])) {
+    $response_node = node_load(key($entity['node']));
+    $form = drupal_get_form('recast_response_node_form', $response_node);
+    $output = drupal_render($form);
+  } else {
+    $ouput = 'Invalid attempt to access Response';
+  }
+
+  return $output;
+
+}
+
+function recast_form_analysis_node_form_alter(&$form, &$form_state, $form_id) {
+  $arg1 = arg(1);
+  if ($arg1 == 'add' OR !user_access('Analysis: Edit any content')) {
+    $form['field_analysis_owner'][LANGUAGE_NONE]['#printed'] = TRUE;
+  }
+  $form['actions']['submit']['#submit'][] = 'recast_analysis_submit';
+}
+
+/* Submit handler for adding or editing an analysis */
+function recast_analysis_submit($form, &$form_state) {
+  $node = $form_state['node'];
+  if ($node->nid > 0 AND user_is_logged_in()) {
+    /* Fire rules event which will handle the event notification email if we are toggling the request ownership field on */
+    if ($node->field_analysis_request_ownership[LANGUAGE_NONE][0]['value'] == 1 AND
+      $form['field_analysis_request_ownership'][LANGUAGE_NONE]['#default_value'] == 0 AND
+      $form_state['values']['field_analysis_owner'][LANGUAGE_NONE][0]['uid'] == NULL )
+    {
+      rules_invoke_event('recast_claim_analysis', $node);
+    }
+  }
+}
+
+
+function recast_form_subscription_node_form_alter(&$form, &$form_state, $form_id) {
+  $nid = arg(1);
+  $op = arg(3);
+
+  $form['field_subscription_type']['#attributes'] = array(
+  'class' => array('field_float_left','field_pad20_right')
+  );
+
+  $form['field_subscription_authoritative ']['#attributes'] = array(
+  'class' => array('field_pad5_top')
+  );
+
+  $form['body']['#attributes'] = array(
+  'class' => array('field_clear')
+  );
+
+  if ($op == 'add') {
+    $form['field_subscription_analysis'][LANGUAGE_NONE]['#default_value'] = $nid;
+    $form['field_subscription_analysis'][LANGUAGE_NONE]['#attributes'] = array (
+     'style' => 'display: none;',
+    );
+    $node = node_load($nid);
+    $form['field_subscription_analysis'][LANGUAGE_NONE]['#title'] = t('Analysis: ')  . '<span>' . $node->title . '</span>';
+
+    $form['actions']['submit']['#submit'][] = 'recast_subscription_redirect';
+  }
+
+  /* Use the #afterbuild attribute to load the needed
+  javascript when adding/editing request node
+  */
+  $form['#after_build'][] = 'analysis_subscription_afterbuild';
+}
+
+function recast_subscription_redirect($form, &$form_state) {
+  global $user;
+
+  $analysis_nid = $form_state['values']['field_subscription_analysis'][LANGUAGE_NONE][0]['target_id'];
+  $analysis = node_load($analysis_nid);
+  $values['sender'] = $user;
+  $values['sender']->name = $user->name;
+  $values['sender']->mail = $user->mail;
+  $values['subject'] = "New Analysis Subscription";
+  $values['node'] = $analysis;
+  $values['linked-url'] =  l($analysis->title,"node/{$analysis->nid}");
+  $values['subscriber_type'] = $form_state['values']['field_subscription_type'][LANGUAGE_NONE][0]['value'];
+  drupal_mail('recast', 'new_subscriber', $user, language_default(), $values);
+  $form_state['redirect'] = "node/$analysis_nid";
+
+}
+
+function analysis_subscription_afterbuild($form, &$form_state) {
+  $path = drupal_get_path('module', 'recast');
+  drupal_add_js ("$path/javascript/node-subscription.js");
+  return $form;
+}
+
+
+function recast_add_request($node) {
+  global $user;
+
+  if( !function_exists("node_form")) {
+    module_load_include('inc', 'node', 'node.pages');
+  }
+
+  if( !function_exists("field_collection_item_form_validate")) {
+    module_load_include('inc', 'field_collection', 'field_collection.pages');
+  }
+
+  $node = new StdClass();
+  $node->uid = $user->uid;
+  $node->name = $user->name;
+  $node->type = 'recast_request';
+  $node->language = '';
+  node_object_prepare($node);
+
+  $form = drupal_get_form('recast_request_node_form', $node);
+
+  $output = drupal_render($form);
+  return $output;
+
+}
+
+
+function recast_form_recast_request_node_form_alter(&$form, &$form_state, $form_id) {
+
+
+  form_load_include($form_state, 'inc', 'node', 'node.pages');
+  $analysis_nid = (int) arg(1);
+  if (isset($form['field_request_analysis'][LANGUAGE_NONE]['#default_value'][0])) {
+    $analysis_nid = $form['field_request_analysis'][LANGUAGE_NONE]['#default_value'][0];
+  }
+  $op = arg(3);
+  if (empty($op)) $op = arg(2);
+  if (empty($analysis_nid) AND !isset($form_state['triggering_element'])) {
+    drupal_set_message('Invalid Node Reference for Analysis');
+    return;
+  }
+
+  /* Have to set the AJAX callback parameter on the field language instance value
+   * Also see this issue for some extra insight: http://drupal.org/node/1024962
+   * Specifically on setting another form field value - as we need to below.
+   */
+  $form['field_request_subscribers'][LANGUAGE_NONE]['#ajax'] = array(
+  /* #ajax has two required keys: callback and wrapper.
+   * 'callback' is a function that will be called when this element changes.
+   */
+  'callback' => 'recast_show_subscriber_info',
+  /* wrapper' is the HTML id of the page element that will be replaced. */
+  'wrapper' => 'subscriber_info',
+  'method' => 'replace',
+  );
+  $form['field_request_subscribers'][LANGUAGE_NONE]['#suffix'] = '<div id="subscriber_info" style="display:none;"></div>';
+
+  if ($op == 'add' OR $op == 'request_edit' OR isset($form_state['triggering_element'])) {
+
+    if ($op == 'add' OR $op == 'request_edit') {
+
+      if ($form['field_request_status'][LANGUAGE_NONE]['#default_value'][0] == RECAST_REQUEST_INCOMPLETE AND isset($form['title']['#default_value'])) {
+
+        $form['title']['#prefix'] = '<div class="request_status_msg">' . t('This request is not yet active and subscribers have not been notified.');
+        $form['title']['#suffix'] = '</div>';
+        // Add a submit button to activate request
+        $form['actions']['activate'] = array(
+        '#type' => 'submit',
+        '#value' => t('Activate Request'),
+        '#weight' => 10,
+        );
+        $form['actions']['activate']['#submit'] = array('node_form_submit','recast_request_submit');
+      }
+
+      // Retrieve the current subscribers to this analysis
+      $options = array();
+      $query = new EntityFieldQuery();
+      $result = $query->entityCondition('entity_type', 'node', '=')
+      ->entityCondition('bundle', 'subscription')
+      ->propertyCondition('status', 1, '=')
+      ->fieldCondition('field_subscription_analysis', 'target_id',  $analysis_nid, '=', 0)
+      ->execute();
+
+      if ($result) {
+        $nodes = entity_load('node', array_keys($result['node']));
+        foreach ($nodes as $node) {
+          $options[$node->uid] = $node->name;
+        }
+      }
+
+      $form['field_request_subscribers'][LANGUAGE_NONE]['#options'] = $options;
+      if ($op == 'add') {
+        $form['field_request_analysis'][LANGUAGE_NONE]['#default_value'] = $analysis_nid;
+        $node = node_load($analysis_nid);
+        $form['field_request_analysis'][LANGUAGE_NONE]['#title'] = t('Analysis: ') . '<span class="analysis_name">' . $node->title . '</span>';
+      } else {
+        $node = node_load($form['field_request_analysis'][LANGUAGE_NONE]['#default_value'][0]);
+        $form['field_request_analysis'][LANGUAGE_NONE]['#title'] = t('Analysis: ') . '<span class="analysis_name">' . $node->title . '</span>';
+      }
+        $form['field_request_analysis'][LANGUAGE_NONE]['#attributes'] = array (
+         'style' => 'display:none;',
+        );
+        $form['title']['#disabled'] = TRUE;
+    }
+
+    if (empty($form['title']['#default_value'])) {
+      // Generate a new title for this request - need the current count
+      $query = new EntityFieldQuery();
+      $request_count = $query->entityCondition('entity_type', 'node', '=')
+      ->entityCondition('bundle', 'recast_request')
+      ->propertyCondition('status', 1, '=')
+      ->count()->execute();
+
+      $request_count++;
+      $request_title =  date("ym") . '.' . str_pad($request_count,4,"0",STR_PAD_LEFT);
+
+      $form['title']['#default_value'] = $request_title;
+      $form['title']['#disabled'] = TRUE;
+      $form['title']['#required'] = FALSE;
+      $form['title']['#attributes'] = array('class' => array('field_hidden'));
+      $form['title']['#title'] = t('Title: ') . '<span class="request_title">' . $request_title . '</span>';
+    } else {
+      $form['title']['#required'] = FALSE;
+      $form['title']['#title'] = t('Title: ') . '<span class="request_title">' . $form['title']['#default_value'] . '</span>';
+    }
+
+  } elseif (!user_access("Analysis: Edit any content")) {
+    $form['title']['#required'] = FALSE;
+    $form['title']['#disabled'] = TRUE;
+  }
+
+  $form['field_request_subscribers']['#states'] = array(
+  'visible' => array('#edit-field-request-audience-und-selective' => array('checked' => TRUE),
+  ),
+  );
+
+  $form['title']['#attributes'] = array('class' => array('field_hidden'));
+
+  $form['field_request_analysis']['#attributes'] = array(
+  'class' => array('field_pad5_top','field_clear')
+  );
+  $form['field_request_audience']['#attributes'] = array(
+  'class' => array('field_float_left', 'field_pad20_right')
+  );
+  $form['field_request_subscribers']['#attributes'] = array(
+  'class' => array('field_float_left')
+  );
+  $form['field_request_status']['#attributes'] = array(
+  'class' => array('field_clear')
+  );
+  $form['field_request_model']['#attributes'] = array(
+  'class' => array('field_clear')
+  );
+  $form['field_request_reason']['#attributes'] = array(
+  'class' => array('field_clear')
+  );
+  $form['field_request_status']['#access'] = FALSE;
+
+  $form['field_request_status_log']['#access'] = FALSE;
+
+  if ($analysis_nid > 0) {
+    $node = node_load($analysis_nid);
+    if ($node AND isset($node->field_run_condition[$node->language])) {
+      foreach ($node->field_run_condition[$node->language] as $key => $id) {
+        $entity_id = intval($id['value']);
+        if ($entity_id > 0) {
+          $run_condition_entity = current(entity_load('field_collection_item', array($entity_id)));
+          $run_condition_name = $run_condition_entity->field_run_condition_name[LANGUAGE_NONE][0]['value'];
+          $run_condition_description = nl2br( $run_condition_entity->field_run_condition_description[LANGUAGE_NONE][0]['value']);
+
+          //$element = array('#markup' => '<div class="recast_edit_runcondition_name">' . $run_condition_name . '</div><div class="recast_edit_runcondition_desc">' . $run_condition_description . '</div>');
+          //$parents = array('field_request_parameter_points',LANGUAGE_NONE,0,'field_req_parm_run_condition',LANGUAGE_NONE,0,'field_request_parm_run_condition',LANGUAGE_NONE,$key);
+          //$parents = array('field_request_parameter_points',LANGUAGE_NONE,0,'field_req_parm_run_condition',LANGUAGE_NONE,0,'field_request_parm_run_condition',LANGUAGE_NONE,$key);
+          //drupal_array_set_nested_value($form,$parents,$element);
+
+          // Nov 16, 2011 (Blaine): Modified to not show the run condition inside the field collection field but in the field group field
+          $run_condition = '<div class="recast_runcondition">'
+                          . '<span class="label">' . ('Run Condition') . ':</span>'
+                          . '<span>' . $run_condition_name . '</span>'
+                          . '</div>'
+                          . '<div class="recast_edit_runcondition_desc"><span>' . $run_condition_description . '</span></div>';
+          $form['#groups']['group_request_parameter_point']->format_settings['instance_settings']['description'] = $run_condition;
+        }
+      }
+    }
+  }
+
+  foreach (array_keys($form['field_request_parameter_points'][LANGUAGE_NONE]) as $point) {
+    if (is_int($point)) {
+      $form['field_request_parameter_points'][LANGUAGE_NONE][$point]['field_req_parm_point'][LANGUAGE_NONE][0]['value']['#title'] .= $point + 1;
+      $form['field_request_parameter_points'][LANGUAGE_NONE][$point]['field_req_parm_run_condition'][LANGUAGE_NONE][0]['field_request_parm_event_count']['#attributes'] = array(
+          'class' => array('field_float_left', 'field_pad20_right'));
+      $form['field_request_parameter_points'][LANGUAGE_NONE][$point]['field_request_parm_ref_xsection'][LANGUAGE_NONE][0]['field_request_parm_event_count']['#attributes'] = array(
+          'class' => array('field_float_left'));
+    }
+  }
+  $form['actions']['submit']['#submit'][] = 'recast_request_submit';
+
+  /* Use the #afterbuild attribute to load the needed
+  javascript when adding/editing request node
+  */
+  $form['#after_build'][] = 'analysis_request_afterbuild';
+
+  return $form;
+
+}
+
+function analysis_request_afterbuild($form, &$form_state) {
+  $path = drupal_get_path('module', 'recast');
+  drupal_add_js ("$path/javascript/node-request.js");
+  return $form;
+}
+
+function recast_request_submit($form, &$form_state) {
+  global $user;
+
+  if ($form_state['clicked_button']['#value'] == t('Activate Request')) {
+    $form_state['redirect'] = "node/{$form_state['node']->nid}/request/confirm/accept";
+  }
+
+  // Rename any uploaded LHE file to our standard {$request_title}_{run_condition}.ext'
+  if (isset($form_state['field']['field_request_parameter_points'][LANGUAGE_NONE]['entity'])) {
+    foreach ($form_state['field']['field_request_parameter_points'][LANGUAGE_NONE]['entity'] as $point_num => $entity) {
+      if (isset($entity->field_req_parm_run_condition[LANGUAGE_NONE][0]['value'])) {
+        $entity_id = $entity->field_req_parm_run_condition[LANGUAGE_NONE][0]['value'];
+        if ($entity_id > 0) {
+          $file_entity = current(entity_load('field_collection_item', array($entity_id)));
+          if ($file_entity) {
+            if (strpos($file_entity->field_request_parm_lhe_file[LANGUAGE_NONE][0]['filename'],'_parm_point') === FALSE) {
+              $fid = $file_entity->field_request_parm_lhe_file[LANGUAGE_NONE][0]['fid'];
+              $ext = end(explode(".", $file_entity->field_request_parm_lhe_file[LANGUAGE_NONE][0]['filename']));
+              $file = file_load($fid);
+              // Retrieve the upload location from the file field setting
+              $parents = array('field_request_parameter_points',LANGUAGE_NONE,0,'field_req_parm_run_condition',LANGUAGE_NONE,0,'field_request_parm_lhe_file',LANGUAGE_NONE,0,'#upload_location');
+              $destination = drupal_array_get_nested_value($form,$parents) . '/';
+              // Best to call file_prepare_directory() - even if you believe directory exists
+              file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
+              $point_num++;
+              $filename = "{$form_state['values']['title']}_parm_point{$point_num}_run_condition1.{$ext}";
+              drupal_set_message("moving file to: $filename");
+              file_move($file, $destination . $filename, FILE_EXISTS_RENAME);
+
+              // Need to clear the cache as the node will still have the original file name
+              field_cache_clear();
+            }
+          }
+        }
+      }
+    }
+  }
+
+}
+
+
+/* Confirm form for request status change */
+function recast_confirm_form($form, &$form_state) {
+
+  $nid = arg(1);
+  $mode = arg(2);
+  $op = arg(4);
+
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => $nid,
+  );
+  $form['mode'] = array(
+    '#type' => 'hidden',
+    '#value' => $mode,
+  );
+  $form['op'] = array(
+    '#type' => 'hidden',
+    '#value' => $op,
+  );
+
+  if ($mode == 'request') {
+      $question = t('Do you really want to activate this request?');
+      $description = t('Activating the request will lock it from further editing and notify subscribers');
+      $confirm_btn = t('Activate Request');
+  }
+
+  return confirm_form($form, $question, "node/$nid", $description, $confirm_btn );
+
+}
+
+function recast_confirm_form_submit($form, &$form_state) {
+  global $user;
+
+  if ($form_state['values']['mode'] == 'request') {
+    drupal_set_message('Change of request status processed');
+    $form_state['redirect'] = "node/{$form_state['values']['nid']}";
+    $node = node_load($form_state['values']['nid']);
+    $node->field_request_status[LANGUAGE_NONE][0]['value'] = 1;
+    $node->field_request_status_log[LANGUAGE_NONE][0]['value'] = format_date(time(),'medium') . ' - Activated';
+    node_save($node);
+
+    $analysis_nid = $node->field_request_analysis[LANGUAGE_NONE][0]['target_id'];
+    $values['sender'] = $user;
+    $values['subject'] = "New RECAST Request";
+    $values['node'] = $node;
+    $values['linked-url'] =  l('RECAST Request',"node/{$node->nid}");
+    drupal_mail('recast', 'new_recast', $user, language_default(), $values);
+
+  }
+}
+
+
+
+function recast_show_subscriber_info($form, $form_state) {
+
+  $retval = '<div id="subscriber_info" style="display:none;"></div>';
+  $analysis_nid = $form_state['values']['field_request_analysis'][LANGUAGE_NONE][0]['target_id'];
+  $subscriber_uid = $form_state['values']['field_request_subscribers'][LANGUAGE_NONE][0]['uid'];
+
+  // Retrieve the subscriber info for this analysis
+  $query = new EntityFieldQuery();
+  $result = $query->entityCondition('entity_type', 'node', '=')
+  ->entityCondition('bundle', 'subscription')
+  ->propertyCondition('status', 1, '=')
+  ->propertyCondition('uid',  $subscriber_uid, '=', 0)
+  ->fieldCondition('field_subscription_analysis', 'target_id', $analysis_nid, '=', 0)
+  ->execute();
+  if ($result) {
+    $nodes = entity_load('node', array_keys($result['node']));
+    if (is_array($nodes)) {
+      $node = current($nodes);
+      if (isset($node->field_subscription_requirements[LANGUAGE_NONE])) {
+        $info = $node->field_subscription_requirements[LANGUAGE_NONE][0]['value'];
+        $retval = '<div id="subscriber_info">' . $info . '</div>';
+      }
+
+    }
+  }
+
+  return $retval;
+
+}
+
+
+
+function recast_form_recast_response_node_form_alter(&$form, &$form_state, $form_id) {
+
+  form_load_include($form_state, 'inc', 'node', 'node.pages');
+
+  /* Hide the status field - we only use it in code
+  * to indicate if the recast request was accepted or not
+  */
+  $form['field_result_status']['#printed'] = TRUE;
+
+  // Retrieve the Analysis Name for this Recast Response - need to load the request node first
+  $analysis_name = '';
+  if ($form['field_result_request'][LANGUAGE_NONE]['#default_value'][0] > 0) {
+    $request_node = node_load($form['field_result_request'][LANGUAGE_NONE]['#default_value'][0]);
+    if ($request_node) {
+      $analysis_node = node_load($request_node->field_request_analysis[LANGUAGE_NONE][0]['target_id']);
+      if ($analysis_node) $analysis_name = $analysis_node->title;
+    }
+  }
+  // Hide the result title
+  $form['title']['#printed'] = TRUE;
+
+  $form['analysis'] = array(
+  '#type' => 'markup',
+  '#prefix' => '<div class="analysis_name"><div class="form_item"><label>Analysis:</label><div class="analysis_name">' . $analysis_name . '</div>',
+  '#suffix' => '</div>',
+  );
+
+  // Hide the result request form field - we just want to display it
+  $form['field_result_request']['#printed'] = TRUE;
+  $form['request'] = array(
+  '#type' => 'markup',
+  '#prefix' => '<div class="analysis_name"><div class="form_item"><label>Request:</label><div class="analysis_name">' . $request_node->title . '</div>',
+  '#suffix' => '</div>',
+  );
+
+  $form['#validate'][] = 'recast_response_validate';
+  $form['actions']['submit']['#submit'][] = 'recast_response_submit';
+
+}
+
+
+/* Handler to set the Recast Result record as completed */
+function recast_response_validate($form, &$form_state) {
+  // Check if we have a result file in the response node and flag as complete if so
+  if ($form_state['values']['field_luminosity_efficiency'][LANGUAGE_NONE][0]['value'] > 0) {
+    $form_state['values']['field_result_status'][LANGUAGE_NONE][0]['value'] = 'completed';
+    $request_node = node_load($form_state['values']['field_result_request'][LANGUAGE_NONE][0]['target_id']);
+    if ($request_node) {
+      // Flag request as complete - status code of 3
+      $request_node->field_request_status[LANGUAGE_NONE][0]['value'] = RECAST_REQUEST_COMPLETED;
+      $request_node->field_request_status_log[LANGUAGE_NONE][0]['value'] .= '<br>' . format_date(time(),'medium') . ' - Completed';
+      node_save($request_node);
+    }
+  }
+}
+
+
+function recast_response_submit($form, &$form_state) {
+  global $user;
+
+  $request_nid = $form_state['values']['field_result_request'][LANGUAGE_NONE][0]['target_id'];
+  $request = node_load($request_nid);
+  $values['sender'] = $user;
+  $values['sender']->name = $user->name;
+  $values['sender']->mail = $user->mail;
+  $values['subject'] = "New RECAST Response";
+  $values['node'] = $request;
+  $values['linked-url'] =  l($request->title,"node/{$request->nid}");
+  drupal_mail('recast', 'new_response', $user, language_default(), $values);
+  $form_state['redirect'] = "node/$request_nid";
+
+}
+
+
+
+
+function recast_contact_member($node) {
+  $output = '';
+  if (module_exists('contact')) {
+    $path = drupal_get_path('module', 'contact');
+    include_once($path .'/contact.pages.inc');
+
+    if( !function_exists("node_form")) {
+      module_load_include('inc', 'node', 'node.pages');
+    }
+
+    $account = user_load($node->uid);
+    $form = drupal_get_form('contact_personal_form', $account);
+    $output = drupal_render($form);
+  }
+
+  return $output;
+
+}
+
+/* Define form to capture comment from member accepting or declining the recast request */
+function recast_request_comment_form($form,&$form_state) {
+  global $user;
+
+  // The subject field will be used in the submit handler - based on if user accepted or declined request
+  $form['subject'] = array(
+  '#type' => 'hidden',
+  );
+
+  $form['comment_body'] = array(
+  '#title' => '',
+  '#type' => 'textarea',
+  );
+
+  $form['submit'] = array(
+  '#type' => 'submit',
+  '#value' => 'Continue'
+  );
+
+  // Has this user accepted this recast request - set the comment subject accordingly
+  $request_nid = arg(1);
+  $query = new EntityFieldQuery();
+  $entity = $query->entityCondition('entity_type', 'node', '=')
+  ->entityCondition('bundle', 'recast_response')
+  ->propertyCondition('status', 1, '=')
+  ->propertyCondition('uid', $user->uid, '=')
+  ->fieldCondition('field_result_request', 'target_id',  $request_nid, '=', 0)
+  ->execute();
+  if (isset($entity['node'])) {
+    $response = current($entity['node']);
+    $responsenode = node_load($response->nid);
+    if ($responsenode->field_result_status[LANGUAGE_NONE][0]['value'] == 'accepted') {
+      $form['subject']['#default_value'] = 'Request Accepted';
+      $form['heading'] = array(
+      '#type' => 'markup',
+      '#prefix' => '<div class="recast_comment_title">' . t('Optional comment to explain why you are accepting this request'),
+      '#weight' => -15,
+      '#suffix' => '</div>',
+      );
+    } elseif ($responsenode->field_result_status[LANGUAGE_NONE][0]['value'] == 'declined') {
+      $form['subject']['#default_value'] = 'Request Declined';
+      $form['heading'] = array(
+      '#type' => 'markup',
+      '#prefix' => '<div class="recast_comment_title">' . t('Optional comment to explain why you are declining this request'),
+      '#weight' => -15,
+      '#suffix' => '</div>',
+      );
+    }
+  }
+
+  return $form;
+
+}
+
+
+function recast_request_comment_form_submit($form, &$form_state) {
+  global $user;
+  $request_nid = arg(1);
+
+  $comment->nid = $request_nid;
+  $comment->cid = 0; // leave it as is
+  $comment->pid = 0; // parent comment id, 0 if none
+  $comment->uid = $user->uid;
+  $comment->mail = $user->mail;
+  $comment->name = $user->name;
+  $comment->hostname = $user->hostname;
+  $comment->created = time();
+  $comment->is_anonymous = 0; // leave it as is
+  $comment->status = COMMENT_PUBLISHED; // We auto-publish this comment
+  $comment->language = LANGUAGE_NONE; // The same as for a node
+  $comment->subject = $form_state['values']['subject'];
+  if (empty($form_state['values']['comment_body'])) {
+    $comment->comment_body[$comment->language][0]['value'] = 'No comment provided.';
+  } else {
+    $comment->comment_body[$comment->language][0]['value'] = $form_state['values']['comment_body'];
+  }
+  $comment->comment_body[$comment->language][0]['format'] = 'filtered_html';
+  comment_submit($comment); // saving a comment
+  comment_save($comment);
+
+  if ($form_state['values']['subject'] == 'Request Accepted') {
+    drupal_set_message("Request has been accepted and notification sent");
+  } else {
+    drupal_set_message("Request has been declined and notification sent");
+  }
+  $form_state['redirect'] = "node/$request_nid";
+
+}
+
+/* Quick mod to change the comment form submit button text */
+function recast_form_comment_form_alter(&$form, &$form_state, $form_id) {
+  $form['actions']['submit']['#value'] = t('Save Comment');
+}
+
+
+/* Override the default comment links for the recast comments only */
+function recast_comment_view_alter(&$build) {
+  if ($build['#bundle'] == 'comment_node_recast_request') {
+    unset($build['links']['comment']['#links']['comment-reply']);
+    if (!user_access('administer comments')) {
+      unset($build['links']['comment']['#links']['comment-delete']);
+      unset($build['links']['comment']['#links']['comment-edit']);
+    }
+  }
+}
+
+
+function recast_claim_ownership() {
+  $nid = intval($_POST['nid']);
+  if ($nid > 0 AND user_is_logged_in()) {
+    $analysis_node = node_load($nid);
+
+    /* Fire rules event which will handle the event notification email */
+    rules_invoke_event('recast_claim_analysis', $analysis_node);
+
+    $retdata = array ('status' => '0');
+  } else {
+    $retdata = array ('status' => '1');
+  }
+  drupal_json_output($retdata);
+}
+
+
+
+
+/**
+* Implements hook_mail().
+*/
+function recast_mail($key, &$message, $params) {
+  global $user;
+
+  $language = $message['language'];
+  $variables = array(
+  '!site-name' => variable_get('site_name', 'Drupal'),
+  '!subject' => $params['subject'],
+  '!linked-url' => url($params['linked-url'], array('absolute' => TRUE, 'language' => $language))
+  );
+
+  // Load the full user entity to access the custom profile fields
+  $user_nodes = entity_load('user', array($user->uid));
+  $user_node = current($user_nodes);
+
+  switch ($key) {
+    case 'new_recast':
+      // Determine the recast audience and retrieve the list of subscribers to notify
+      $node = $params['node'];
+      $analysis_nid = $node->field_request_analysis[LANGUAGE_NONE][0]['target_id'];
+      $analysis_node = node_load($analysis_nid);
+      $request_audience = $node->field_request_audience[LANGUAGE_NONE][0]['value'];
+      $subscribers = array();
+      if ($request_audience == 'selective') {
+        $selective_subscribers = array_values($node->field_request_subscribers[LANGUAGE_NONE]);
+        foreach ($selective_subscribers as $subscriber) {
+          $subscriber = user_load($subscriber['uid']);
+          $subscribers[] = $subscriber->mail;
+        }
+      } else {
+        $subscription_query = new EntityFieldQuery();
+        $subscription_result = $subscription_query->entityCondition('entity_type', 'node', '=')
+        ->entityCondition('bundle', 'subscription')
+        ->propertyCondition('status', 1, '=')
+        ->fieldCondition('field_subscription_analysis', 'target_id',  $analysis_nid, '=', 0)
+        ->execute();
+        if ($subscription_result) {
+          $subscription_nodes = entity_load('node', array_keys($subscription_result['node']));
+          if (is_array($subscription_nodes) AND count($subscription_nodes) > 0) {
+            foreach ($subscription_nodes as $subscription) {
+              // Check the members subscription type and see if they wanted to be informed about recast requests
+              if(isset($subscription->field_subscription_notifications[LANGUAGE_NONE])) {
+                foreach ($subscription->field_subscription_notifications[LANGUAGE_NONE] as $option) {
+                  if ($option['value'] == 'recast_requests') {
+                    $subscriber = user_load($subscription->uid);
+                    $subscribers[] = $subscriber->mail;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if(isset($user_node->field_realname[LANGUAGE_NONE])) {
+        $realname = $user_node->field_realname[LANGUAGE_NONE][0]['value'];
+      } else {
+        $realname = '';
+      }
+      if(isset($user_node->field_institution[LANGUAGE_NONE])) {
+        $institution = $user_node->field_institution[LANGUAGE_NONE][0]['value'];
+      } else {
+        $institution = '';
+      }
+
+      $message['body'][] = sprintf('New recast %s has been created for Analysis: %s by %s (%s) from %s.',
+      l('request',"node/{$node->nid}"),
+      l($analysis_node->title,"node/{$analysis_node->nid}"),
+      $user->name,
+      $realname,
+      $institution);
+
+      $message['headers']['Bcc'] = implode(',',$subscribers);
+      //RK -- we will need to adjust this 'to' address to be the right perimiter institute addr.
+      //Using noreply right now which should be a default for most email systems
+      $message['to'] = 'noreply@perimiterinstitute.ca';
+      $message['subject'] .= t('[!subject', $variables, array('langcode' => $language->language));
+      $message['body'][] = t("If you don't want to receive such e-mails, you can change your settings accessible from the My Acccount link top right hand side of the site.");
+      watchdog('recast', 'New Notification for Analysis @analysis sent to users: @users', array('@analysis' => $analysis_node->title, '@users' => $message['headers']['Bcc']));
+      break;
+
+    case 'new_subscriber':
+      // Determine the current subscribers that have requested to be notified of new subscribers
+      $analysis_node = $params['node'];
+      $subscribers = array();
+      $subscription_query = new EntityFieldQuery();
+      $subscription_result = $subscription_query->entityCondition('entity_type', 'node', '=')
+      ->entityCondition('bundle', 'subscription')
+      ->propertyCondition('status', 1, '=')
+      ->fieldCondition('field_subscription_analysis', 'target_id',  $analysis_node->nid, '=', 0)
+      ->execute();
+      if ($subscription_result) {
+        $subscription_nodes = entity_load('node', array_keys($subscription_result['node']));
+        if (is_array($subscription_nodes) AND count($subscription_nodes) > 0) {
+          foreach ($subscription_nodes as $subscription) {
+            // Check the members subscription type and see if they wanted to be informed about recast requests
+            if(isset($subscription->field_subscription_notifications[LANGUAGE_NONE])) {
+              foreach ($subscription->field_subscription_notifications[LANGUAGE_NONE] as $option) {
+                if ($option['value'] == 'new_subscribers' AND $subscription->uid != $user->uid) {
+                  $subscriber = user_load($subscription->uid);
+                  $subscribers[] = $subscriber->mail;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if(isset($user_node->field_realname[LANGUAGE_NONE])) {
+        $realname = $user_node->field_realname[LANGUAGE_NONE][0]['value'];
+      } else {
+        $realname = '';
+      }
+      if(isset($user_node->field_institution[LANGUAGE_NONE])) {
+        $institution = $user_node->field_institution[LANGUAGE_NONE][0]['value'];
+      } else {
+        $institution = '';
+      }
+
+      $message['body'][] = sprintf('New subscription of type "%s" to analysis %s has been created for user %s (%s) from %s.',
+      $params['subscriber_type'],
+      l($analysis_node->title,"node/{$analysis_node->nid}"),
+      $user->name,
+      $realname,
+      $institution);
+
+      $message['headers']['Bcc'] = implode(',',$subscribers);
+      //RK -- we will need to adjust this 'to' address to be the right perimiter institute addr.
+      //Using noreply right now which should be a default for most email systems
+      $message['to'] = 'noreply@perimiterinstitute.ca';
+      $message['subject'] .= t('[!subject', $variables, array('langcode' => $language->language));
+      $message['body'][] = t("If you don't want to receive such e-mails, you can change your settings accessible from the My Acccount link top right hand side of the site.");
+      watchdog('recast', 'New Subscriber Notification for Analysis @analysis sent to users: @users', array('@analysis' => $analysis_node->title, '@users' => $message['headers']['Bcc']));
+      break;
+
+    case 'new_response':
+      // Determine the current subscribers that have requested to be notified of new subscribers
+      $request_node = $params['node'];
+      $analysis_nid = $request_node->field_request_analysis[LANGUAGE_NONE][0]['target_id'];
+      $analysis_node = node_load($analysis_nid);
+
+      $subscribers = array();
+      $subscription_query = new EntityFieldQuery();
+      $subscription_result = $subscription_query->entityCondition('entity_type', 'node', '=')
+      ->entityCondition('bundle', 'subscription')
+      ->propertyCondition('status', 1, '=')
+      ->fieldCondition('field_subscription_analysis', 'target_id',  $analysis_node->nid, '=', 0)
+      ->execute();
+      if ($subscription_result) {
+        $subscription_nodes = entity_load('node', array_keys($subscription_result['node']));
+        if (is_array($subscription_nodes) AND count($subscription_nodes) > 0) {
+          foreach ($subscription_nodes as $subscription) {
+            // Check the members subscription type and see if they wanted to be informed about recast requests
+            if(isset($subscription->field_subscription_notifications[LANGUAGE_NONE])) {
+              foreach ($subscription->field_subscription_notifications[LANGUAGE_NONE] as $option) {
+                if ($option['value'] == 'recast_responses' AND $subscription->uid != $user->uid) {
+                  $subscriber = user_load($subscription->uid);
+                  $subscribers[] = $subscriber->mail;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if(isset($user_node->field_realname[LANGUAGE_NONE])) {
+        $realname = $user_node->field_realname[LANGUAGE_NONE][0]['value'];
+      } else {
+        $realname = '';
+      }
+      if(isset($user_node->field_institution[LANGUAGE_NONE])) {
+        $institution = $user_node->field_institution[LANGUAGE_NONE][0]['value'];
+      } else {
+        $institution = '';
+      }
+
+      $message['body'][] = sprintf('New recast response %s for analysis %s has been submitted by user %s (%s) from %s.',
+      l($request_node->title,"node/{$request_node->nid}"),
+      l($analysis_node->title,"node/{$analysis_node->nid}"),
+      $user->name,
+      $realname,
+      $institution);
+
+      $message['headers']['Bcc'] = implode(',',$subscribers);
+      //RK -- we will need to adjust this 'to' address to be the right perimiter institute addr.
+      //Using noreply right now which should be a default for most email systems
+      $message['to'] = 'noreply@perimiterinstitute.ca';
+      $message['subject'] .= t('[!subject', $variables, array('langcode' => $language->language));
+      $message['body'][] = t("If you don't want to receive such e-mails, you can change your settings accessible from the My Acccount link top right hand side of the site.");
+      watchdog('recast', 'New Response Notification for Request @analysis sent to users: @users', array('@analysis' => $request_node->title, '@users' => $message['headers']['Bcc']));
+      break;
+
+
+  }
+}
+
+
+function recast_user_in_audience(&$node) {
+  global $user;
+  // Check and see what the request audience is All or Selective
+  if ($node AND $node->field_request_audience[LANGUAGE_NONE][0]['value'] == 'selective') {
+    if (isset($node->field_request_subscribers[LANGUAGE_NONE])) {
+      foreach ($node->field_request_subscribers[LANGUAGE_NONE] as $request_target) {
+        if ($request_target['uid'] == $user->uid) {
+          return TRUE;
+        }
+      }
+    }
+  } else {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+function recast_check_subscription(&$node,$type='') {
+  global $user;
+
+  if ($node->type == 'analysis') {
+    $analysis_nid = $node->nid;
+  } elseif ($node->type == 'recast_request') {
+    $analysis_nid = $node->field_request_analysis[LANGUAGE_NONE][0]['target_id'];
+  }
+
+  // Check and see if user is a subscriber of type provider
+  $query = new EntityFieldQuery();
+  $entity = $query->entityCondition('entity_type', 'node', '=')
+  ->entityCondition('bundle', 'subscription')
+  ->propertyCondition('status', 1, '=')
+  ->propertyCondition('uid', $user->uid, '=')
+  ->fieldCondition('field_subscription_analysis', 'target_id', $analysis_nid, '=', 0)
+  ->execute();
+  if (isset($entity['node'])) {
+    $subscription_node = node_load(key($entity['node']));
+    if (empty($type)) {
+      return TRUE;
+    } elseif ($subscription_node->field_subscription_type[LANGUAGE_NONE][0]['value'] == $type) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+
+
+

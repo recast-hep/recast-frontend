@@ -1,0 +1,382 @@
+#page {
+  width:1024px;
+  margin:0 auto;
+}
+
+#frontpage-wrapper #sidebar-first {
+  width:350px;
+}
+
+#frontpage-wrapper #content {
+  width:610px;
+}
+
+#frontpage-wrapper #content h1 {
+  margin-top:20px;
+  margin-bottom:0px;
+  padding-bottom:0px;
+}
+
+#frontpage-wrapper #content {
+  background-color: #F6F6F2;
+  margin-top:10px;
+}
+
+#frontpage-wrapper #content .tabs {
+  display:none;
+}
+
+#frontpage-wrapper #content .content {
+  margin-top: 0px;
+}
+
+#frontpage-wrapper h1, #frontpage-wrapper  h2 {
+  border-bottom: 1px solid #D6D6D6;
+  font-size: 1.2em;
+  line-height: 1.2;
+  margin: 0 0 0.5em;
+  padding-bottom: 5px;
+  color: #3B3B3B;
+}
+
+#featured {
+  padding-bottom:0px;
+  padding-top:0px;
+  background-color:#FFF;
+}
+
+#featured h2 {
+  text-align:left;
+}
+
+#featured .container-inline {
+  width:400px;
+}
+
+
+.view-recast-requests .views-field-title {
+  width:60px;
+}
+
+.view-recast-requests .views-field-field-request-model {
+  width:100px;
+}
+
+.view-recast-requests .views-field-field-request-status {
+  width:65px;
+}
+
+.views-field-title {
+  width:100px;
+}
+
+
+.feed-icon img {
+  display: none;
+}
+
+.field_float_left {
+  float: left;
+}
+
+
+.field_pad20_right {
+  padding-right: 20px;
+}
+
+.field_pad5_top {
+  padding-top: 5px;
+}
+
+.field_clear {
+  clear: both;
+}
+
+.field_hidden {
+  display: none;
+}
+
+#home_page_image {
+  margin:0px;
+  padding:0px;
+  line-height: 0px;
+}
+
+#home_page_image img {
+  width:960px;
+}
+
+#main-menu-links a {
+  background: none;
+  text-shadow: none;
+  color: #FFF;
+  font-size:13pt;
+}
+
+#main-menu-links li.active-trail a {
+  background: none;
+  text-shadow: none;
+  color: #FFF;
+}
+
+.featured #main-menu-links li.active a,
+#main-menu-links li.active a {
+  background: #0094D6;
+}
+
+#main-menu-links a:hover {
+  background: #09151C;
+}
+
+.recast_runcondition span.label {
+  font-weight: bold;
+  font-size: 110%;
+  padding-right:10px;
+}
+
+.recast_edit_runcondition_desc {
+  font-style: italic;
+  padding: 0px 0px 5px 5px;
+}
+
+.node-recast-request div.field-label {
+  width:180px;
+}
+
+#recast-request-node-form .form-item-title label {
+  float:left;
+  padding-right:45px;
+}
+
+.form-item-title.form-disabled label {
+  background:#FFFFFF;
+  color: #3B3B3B;
+  border-color: #FFFFFF;
+  font-weight: bold;
+}
+
+.request_title {
+  font-size:120%;
+}
+
+.form-item-field-request-analysis-und label span {
+  font-weight: normal;
+}
+
+#recast-request-node-form .field-name-field-request-analysis label {
+  /*float:left;*/
+  padding-right:20px;
+}
+
+#recast-request-node-form .form-item-field-request-status-und label {
+  float:left;
+  padding-right:45px;
+}
+
+#recast-request-node-form .form-item-field-request-subscribers-und  {
+  float:left;
+  padding-right:45px;
+}
+
+#recast-request-node-form .form-item-field-request-subscribers-und  select {
+   width:120px;
+   padding-right:20px;
+}
+
+#subscriber_info {
+  margin-top:20px;
+  float:left;
+  border:1px solid #CCC;
+  padding:10px;
+  background-color: #FFE599;
+  color: #000;
+}
+
+#subscriber_info .error {
+  display: none;
+}
+
+.recast_edit_runcondition_name {
+  font-weight: bold;
+  font-size:110%;
+}
+
+.group-request-parameter-point .fieldset-description {
+  margin-bottom: 0;
+}
+
+
+#node_recast_request_form_group_recast_description {
+  clear: both;
+}
+
+.field-name-field-req-parm-lhe-file {
+  padding-right:20px;
+}
+.field-name-field-req-parm-lhe-file,
+.field-name-field-req-parm-event-count {
+  float:left;
+}
+
+
+.node-analysis .field-label-inline,
+.node-recast-request .field-label-inline {
+  padding:5px 0px;
+}
+
+.node-analysis .field-label,
+.node-recast-request .field-label {
+  width:150px;
+}
+
+.node-analysis .field-name-field-analysis-description div.field-items {
+  width:530px;
+  padding: 3px;
+  border:1px solid #CCC;
+}
+
+.recast_comment_title {
+  font-size:110%;
+  font-weight:bold;
+  padding-bottom:5px;
+}
+
+label span {
+  font-weight:normal;
+  padding-left:5px;
+}
+
+
+.view-analysis-catalog .views-field-title {
+  width:300px;
+}
+.view-analysis-catalog .views-field-analysis-actions {
+  width:220px;
+}
+
+#recast-response-node-form .form-type-textfield label,
+#recast-response-node-form .form-type-select label,
+#recast-response-node-form .form-type-link-field label,
+#recast-response-node-form .analysis_name label {
+  float:left;
+  padding-right:45px;
+}
+
+#recast-response-node-form .form-item-title label {
+  padding-right:60px;
+}
+
+#recast-response-node-form .form-type-managed-file label {
+  width: 220px;
+}
+
+#recast-response-node-form .field-name-field-result-request label {
+  color: #3B3B3B;
+}
+
+#recast-response-node-form .analysis_name {
+  padding-bottom:10px;
+}
+
+#recast-response-node-form .field-name-field-result-publish {
+  padding-left:120px;
+}
+
+#recast-response-node-form .form-type-managed-file input {
+  border:1px solid #CCC;
+  margin-right:10px;
+}
+
+#recast-response-node-form .field-name-field-luminosity-efficiency label,
+#recast-response-node-form .field-name-field-total-luminosity label,
+#recast-response-node-form .field-name-field-lower1-signal label,
+#recast-response-node-form .field-name-field-lower2-signal label,
+#recast-response-node-form .field-name-field-upper1-signal label,
+#recast-response-node-form .field-name-field-upper2-signal label {
+  width:360px;
+}
+
+.request_subscribers_info {
+  padding-left:20px;
+  border:1px solid #CCC;
+  width:400px;
+  background-color: #FFD966;
+}
+
+#footer {
+  margin:0;
+  width:1000px;
+}
+
+#footer .region {
+  margin-top:10px;
+}
+
+.request_subscribers_info .username {
+  width:95px;
+  float:left;
+}
+
+#footer-wrapper {
+  padding-top:0px;
+  padding-bottom:5px;
+  margin-bottom:0px;
+  background-color: #132D3D;
+}
+
+#footer_left {
+  float:left;
+  width:35%;
+  padding-left:10px;
+}
+
+#footer_right {
+  float:right;
+  width:65%;
+  text-align:right;
+}
+
+#block-search-form {
+  padding-left:15px;
+}
+
+#block-search-form .form-item-search-block-form input {
+  width:300px;
+}
+
+#search-block-form input.form-submit {
+  background: none;
+  text-indent: 0;
+  width:80px;
+  padding:0px 0px 5px 0px;
+  font-size: 9pt;
+}
+
+#edit-search-block-form--2 {
+ margin-top: 10px;
+}
+
+#recast-confirm-form,
+#recast-accept-confirm-form,
+#recast-cancel-confirm-form  {
+  border: 1px solid #CCC;
+  padding: 10px;
+  text-align:center;
+  width:500px;
+  margin:0px auto;
+}
+
+
+div.request_status_msg {
+  color:#ff0000;
+}
+
+.unavailable {
+  color:#ff0000;
+  white-space: nowrap;
+}
+
+div.cancelbutton {
+  padding-left:20px;
+  display:inline;
+}

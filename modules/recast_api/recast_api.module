@@ -1,0 +1,686 @@
+<?php
+
+
+// recast_api.module
+
+/**
+     * Implements hook_perm().
+     */
+    function recast_api_perm() {
+      return array(
+        'recast api resource create',
+        'recast api resource view',
+        'recast api resource edit',
+        'recast api resource delete',
+      );
+    }
+    
+    
+    function recast_api_services_resources() {
+      //the name 'recast' in the array below is the name of the RESTful interface THIS code provides
+      //as a result, the uri to make a request is http://domain/..services module endpoint../recast
+      return array(
+      
+
+        
+        
+/*****************************************************************************************
+         * RECAST-ANALYSIS RESOURCE
+*****************************************************************************************/         
+        'recast-analysis' => array (
+          'targeted_actions' => array(
+            'add-run-condition' => array(
+               'help' => 'Add a Run Condition to the analysis',
+               'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_analysis_api'),
+               'callback' => '_recast_analysis_api_add_run_condition',  
+               'access callback' => '_recast_api_access',
+               'access arguments' => array('update'),
+               'access arguments append' => FALSE,
+               'args' => array(
+                 array(
+                   'name' => 'uuid',
+                   'type' => 'string',
+                   'description' => 'The uuid of the request to update',
+                   'source' => array('path' => '0'),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'data',
+                   'type' => 'struct',
+                   'description' => 'The request item object',
+                   'source' => 'data',
+                   'optional' => FALSE,
+                 ),
+               ),
+             ),// end targeted_action add-run-condition
+            ), //end of targetted actions for recast analysis
+         'create' => array(
+           'help' => 'Creates an analysis',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_analysis_api'),
+           'callback' => '_recast_analysis_api_create',  
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('create'),
+           'access arguments append' => FALSE,
+           'args' => array(
+             array(
+               'name' => 'data',
+               'type' => 'struct',
+               'description' => 'The analysis item object',
+               'source' => 'data',
+               'optional' => FALSE,
+             ),
+           ),
+         ),
+         'retrieve' => array(
+           'help' => 'Retrieves an analysis',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_analysis_api'),
+           'callback' => '_recast_analysis_api_retrieve',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('view'),
+           'access arguments append' => TRUE,
+           'args' => array(
+             array(
+               'name' => 'uuid',
+               'type' => 'string',
+               'description' => 'The uuid of the analysis to get',
+               'source' => array('path' => '0'),
+               'optional' => false,
+             ),
+           ),
+         ),
+         'index' => array(
+           'help' => 'Retrieves a listing of analyses',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_analysis_api'),
+           'callback' => '_recast_analysis_api_index',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('view'),
+           'access arguments append' => FALSE,
+           'args' => array(
+             array(
+               'name' => 'page',
+               'type' => 'int',
+               'description' => '',
+               'source' => array(
+                 'param' => 'page',
+               ),
+               'optional' => TRUE,
+               'default value' => '0',
+             )
+           ),
+         ),
+        ), //end of recast-analysis resource
+        
+        
+        
+        
+/*****************************************************************************************
+         * RECAST-REQUEST RESOURCE
+*****************************************************************************************/              
+        'recast-request' => array (
+          'targeted_actions' => array(
+            'add-parameter-point' => array(
+               'help' => 'Add a parameter point to the request',
+               'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_request_api'),
+               'callback' => '_recast_request_api_add_parameter_point',  
+               'access callback' => '_recast_api_access',
+               'access arguments' => array('update'),
+               'access arguments append' => FALSE,
+               'args' => array(
+                 array(
+                   'name' => 'uuid',
+                   'type' => 'string',
+                   'description' => 'The uuid of the request to add a point to',
+                   'source' => array('path' => '0'),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'username',
+                   'type' => 'string',
+                   'description' => 'The username of the user for this request',
+                   'source' => array(
+                     'param' => 'username',
+                   ),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'parameter_point',
+                   'type' => 'string',
+                   'description' => 'The parameter point to add',
+                   'source' => array(
+                     'param' => 'parameter_point',
+                   ),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'number_of_events',
+                   'type' => 'string',
+                   'description' => 'The number of events for this point',
+                   'source' => array(
+                     'param' => 'number_of_events',
+                   ),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'cross_sections',
+                   'type' => 'string',
+                   'description' => 'The reference cross section for this point',
+                   'source' => array(
+                     'param' => 'cross_sections',
+                   ),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'filename',
+                   'type' => 'string',
+                   'description' => 'The filename for your uploaded file',
+                   'source' => array(
+                     'param' => 'filename',
+                   ),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'data',
+                   'type' => 'struct',
+                   'description' => 'The request point LHE File',
+                   'source' => 'data',
+                   'optional' => FALSE,
+                 ),
+               ),
+             ),// end targeted_action add-parameter-point
+            'update' => array(
+               'help' => 'Update a request',
+               'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_request_api'),
+               'callback' => '_recast_request_api_update',  
+               'access callback' => '_recast_api_access',
+               'access arguments' => array('update'),
+               'access arguments append' => FALSE,
+               'args' => array(
+                 array(
+                   'name' => 'uuid',
+                   'type' => 'string',
+                   'description' => 'The uuid of the request to update',
+                   'source' => array('path' => '0'),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'data',
+                   'type' => 'struct',
+                   'description' => 'The request item object',
+                   'source' => 'data',
+                   'optional' => FALSE,
+                 ),
+               ),
+             ),// end targeted_action update
+             'accept' => array(
+               'help' => 'Accept a request',
+               'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_request_api'),
+               'callback' => '_recast_request_api_accept',  
+               'access callback' => '_recast_api_access',
+               'access arguments' => array('update'),
+               'access arguments append' => FALSE,
+               'args' => array(
+                 array(
+                   'name' => 'uuid',
+                   'type' => 'string',
+                   'description' => 'The uuid of the request to accept',
+                   'source' => array('path' => '0'),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'username',
+                   'type' => 'string',
+                   'description' => '',
+                   'source' => array(
+                     'param' => 'username',
+                   ),
+                   'optional' => FALSE,
+                   'default value' => '',
+                 ),
+               ),
+             ),// end targeted_action accept
+        ), //end targeted_actions
+        'create' => array(
+             'help' => 'Creates a request',
+             'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_request_api'),
+             'callback' => '_recast_request_api_create',  
+             'access callback' => '_recast_api_access',
+             'access arguments' => array('create'),
+             'access arguments append' => FALSE,
+             'args' => array(
+               array(
+                 'name' => 'data',
+                 'type' => 'struct',
+                 'description' => 'The request item object',
+                 'source' => 'data',
+                 'optional' => FALSE,
+               ),
+             ),
+           ),
+         'retrieve' => array(
+           'help' => 'Retrieves an analysis',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_request_api'),
+           'callback' => '_recast_request_api_retrieve',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('view'),
+           'access arguments append' => TRUE,
+           'args' => array(
+             array(
+               'name' => 'uuid',
+               'type' => 'string',
+               'description' => 'The uuid of the request to get',
+               'source' => array('path' => '0'),
+               'optional' => false,
+             ),
+           ),
+         ),
+         //RK -- going to use a targetted POST action for updating a request
+         //keeping this here for now to respect the PUT, but not make it active
+                           /*'update' => array(
+                             'help' => 'Updates a request',
+                             'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_request_api'),
+                             'callback' => '_recast_request_api_update',
+                             'access callback' => '_recast_api_access',
+                             'access arguments' => array('update'),
+                             'access arguments append' => TRUE,
+                             'args' => array(
+                               array(
+                                 'name' => 'uuid',
+                                 'type' => 'string',
+                                 'description' => 'The uuid of the request to update',
+                                 'source' => array('path' => '0'),
+                                 'optional' => FALSE,
+                               ),
+                               array(
+                                 'name' => 'data',
+                                 'type' => 'struct',
+                                 'description' => 'The request data object',
+                                 'source' => 'data',
+                                 'optional' => FALSE,
+                               ),
+                             ),
+                           ),*/
+         'delete' => array(
+           'help' => 'Deletes a request',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_request_api'),
+           'callback' => '_recast_request_api_delete',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('delete'),
+           'access arguments append' => TRUE,
+           'args' => array(
+             array(
+               'name' => 'uuid',
+               'type' => 'string',
+               'description' => 'The id of the request to delete',
+               'source' => array('path' => '0'),
+               'optional' => FALSE,
+             ),
+             array(
+               'name' => 'username',
+               'type' => 'string',
+               'description' => 'The username of the owner',
+               'source' => array(
+                 'param' => 'username',
+               ),
+               'optional' => FALSE,
+             ),
+           ),
+         ),
+         'index' => array(
+           'help' => 'Retrieves a listing of requests',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_request_api'),
+           'callback' => '_recast_request_api_index',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('view'),
+           'access arguments append' => FALSE,
+           'args' => array(
+             array(
+               'name' => 'page',
+               'type' => 'int',
+               'description' => '',
+               'source' => array(
+                 'param' => 'page',
+               ),
+               'optional' => TRUE,
+               'default value' => '0',
+             ),
+           array(
+               'name' => 'pagesize',
+               'type' => 'int',
+               'description' => '',
+               'source' => array(
+                 'param' => 'pagesize',
+               ),
+               'optional' => TRUE,
+               'default value' => '20',
+             ),
+           array(
+               'name' => 'username',
+               'type' => 'string',
+               'description' => '',
+               'source' => array(
+                 'param' => 'username',
+               ),
+               'optional' => TRUE,
+               'default value' => '',
+             ),
+           array(  //the type parameter will be used to specify:  type=all|accepted
+               'name' => 'type',
+               'type' => 'string',
+               'description' => '',
+               'source' => array(
+                 'param' => 'type',
+               ),
+               'optional' => TRUE,
+               'default value' => 'all',
+             ),
+           ),
+         ),
+        ), //end of recast-request resource
+        
+      
+        
+        
+        
+        
+        
+        
+        
+/*****************************************************************************************
+         * RECAST-SUBSCRIPTION RESOURCE
+*****************************************************************************************/              
+        'recast-subscription' => array (
+          'targeted_actions' => array(
+            'update' => array(
+               'help' => 'Update a subscription',
+               'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_subscription_api'),
+               'callback' => '_recast_subscription_api_update',  
+               'access callback' => '_recast_api_access',
+               'access arguments' => array('update'),
+               'access arguments append' => FALSE,
+               'args' => array(
+                 array(
+                   'name' => 'uuid',
+                   'type' => 'string',
+                   'description' => 'The uuid of the subscription to get',
+                   'source' => array('path' => '0'),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'data',
+                   'type' => 'struct',
+                   'description' => 'The subscription item object',
+                   'source' => 'data',
+                   'optional' => FALSE,
+                 ),
+               ),
+             ),// end targeted_action update
+        ), //end targeted_actions
+        'create' => array(
+             'help' => 'Creates a subscription',
+             'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_subscription_api'),
+             'callback' => '_recast_subscription_api_create',  
+             'access callback' => '_recast_api_access',
+             'access arguments' => array('create'),
+             'access arguments append' => FALSE,
+             'args' => array(
+               array(
+                 'name' => 'data',
+                 'type' => 'struct',
+                 'description' => 'The subscription item object',
+                 'source' => 'data',
+                 'optional' => FALSE,
+               ),
+             ),
+           ),
+         'retrieve' => array(
+           'help' => 'Retrieves a subscription',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_subscription_api'),
+           'callback' => '_recast_subscription_api_retrieve',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('view'),
+           'access arguments append' => TRUE,
+           'args' => array(
+             array(
+               'name' => 'uuid',
+               'type' => 'string',
+               'description' => 'The uuid of the subscription to get',
+               'source' => array('path' => '0'),
+               'optional' => false,
+             ),
+           ),
+         ),
+         'delete' => array(
+           'help' => 'Deletes a subscription',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_subscription_api'),
+           'callback' => '_recast_subscription_api_delete',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('delete'),
+           'access arguments append' => TRUE,
+           'args' => array(
+             array(
+               'name' => 'uuid',
+               'type' => 'string',
+               'description' => 'The id of the subscription to delete',
+               'source' => array('path' => '0'),
+               'optional' => FALSE,
+             ),
+             array(
+               'name' => 'username',
+               'type' => 'string',
+               'description' => 'The username of the owner',
+               'source' => array(
+                 'param' => 'username',
+               ),
+               'optional' => FALSE,
+             ),
+           ),
+         ),
+         'index' => array(
+           'help' => 'Retrieves a listing of subscriptions',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_subscription_api'),
+           'callback' => '_recast_subscription_api_index',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('view'),
+           'access arguments append' => FALSE,
+           'args' => array(
+             array(
+               'name' => 'page',
+               'type' => 'int',
+               'description' => '',
+               'source' => array(
+                 'param' => 'page',
+               ),
+               'optional' => TRUE,
+               'default value' => '0',
+             ),
+           array(
+               'name' => 'pagesize',
+               'type' => 'int',
+               'description' => '',
+               'source' => array(
+                 'param' => 'pagesize',
+               ),
+               'optional' => TRUE,
+               'default value' => '20',
+             ),
+           array(
+               'name' => 'username',
+               'type' => 'string',
+               'description' => '',
+               'source' => array(
+                 'param' => 'username',
+               ),
+               'optional' => TRUE,
+               'default value' => '',
+             ),
+           ),
+         ),
+        ), //end of recast-subscription resource
+        
+        
+        
+        
+        
+        
+        
+                
+/*****************************************************************************************
+         * RECAST-RESPONSE RESOURCE
+*****************************************************************************************/              
+        'recast-response' => array (
+          'targeted_actions' => array(
+            'update' => array(
+               'help' => 'Update a response',
+               'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_response_api'),
+               'callback' => '_recast_response_api_update',  
+               'access callback' => '_recast_api_access',
+               'access arguments' => array('update'),
+               'access arguments append' => FALSE,
+               'args' => array(
+                 array(
+                   'name' => 'uuid',
+                   'type' => 'string',
+                   'description' => 'The uuid of the response to get',
+                   'source' => array('path' => '0'),
+                   'optional' => false,
+                 ),
+                 array(
+                   'name' => 'file-id',
+                   'type' => 'string',
+                   'description' => 'The file id from the request',
+                   'source' => array(
+                     'param' => 'filename',
+                   ),
+                   'optional' => true,
+                 ),
+                 array(
+                   'name' => 'data',
+                   'type' => 'struct',
+                   'description' => 'The response item object',
+                   'source' => 'data',
+                   'optional' => FALSE,
+                 ),
+               ),
+             ),// end targeted_action update
+        ), //end targeted_actions
+        
+                  //RK --  I have disabled the create as this is NOT how we manage the response creation process.
+                  //Creation of a response is done through accepting a request.
+                  /*
+                                'create' => array(
+                                     'help' => 'Creates a response',
+                                     'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_response_api'),
+                                     'callback' => '_recast_response_api_create',  
+                                     'access callback' => '_recast_api_access',
+                                     'access arguments' => array('create'),
+                                     'access arguments append' => FALSE,
+                                     'args' => array(
+                                       array(
+                                         'name' => 'data',
+                                         'type' => 'struct',
+                                         'description' => 'The response item object',
+                                         'source' => 'data',
+                                         'optional' => FALSE,
+                                       ),
+                                     ),
+                                   ),
+                   */
+         'retrieve' => array(
+           'help' => 'Retrieves a response',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_response_api'),
+           'callback' => '_recast_response_api_retrieve',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('view'),
+           'access arguments append' => TRUE,
+           'args' => array(
+             array(
+               'name' => 'uuid',
+               'type' => 'string',
+               'description' => 'The uuid of the response to get',
+               'source' => array('path' => '0'),
+               'optional' => false,
+             ),
+           ),
+         ),
+         'index' => array(
+           'help' => 'Retrieves a listing of responses',
+           'file' => array('file' => 'inc', 'module' => 'recast_api', 'name' => 'recast_response_api'),
+           'callback' => '_recast_response_api_index',
+           'access callback' => '_recast_api_access',
+           'access arguments' => array('view'),
+           'access arguments append' => FALSE,
+           'args' => array(
+             array(
+               'name' => 'page',
+               'type' => 'int',
+               'description' => '',
+               'source' => array(
+                 'param' => 'page',
+               ),
+               'optional' => TRUE,
+               'default value' => '0',
+             ),
+           array(
+               'name' => 'pagesize',
+               'type' => 'int',
+               'description' => '',
+               'source' => array(
+                 'param' => 'pagesize',
+               ),
+               'optional' => TRUE,
+               'default value' => '20',
+             ),
+           array(
+               'name' => 'username',
+               'type' => 'string',
+               'description' => '',
+               'source' => array(
+                 'param' => 'username',
+               ),
+               'optional' => TRUE,
+               'default value' => '',
+             ),
+           ),
+         ),
+        ), //end of recast-response resource
+                
+     
+      );
+    }
+    
+    
+    
+    
+    
+
+    
+    
+    
+    /**
+     * Access callback for the recast api resource.
+     *
+     * @param string $op
+     *  The operation that's going to be performed.
+     * @param array $args
+     *  The arguments that will be passed to the callback.
+     * @return bool
+     *  Whether access is given or not.
+     */
+    function _recast_api_access($op, $args=null) {
+      return true;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+   

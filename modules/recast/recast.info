@@ -1,0 +1,4 @@
+name = recast
+description = Recast Module for Perimeter Institute - Developed by Nextide Inc
+core=7.x
+files[] = recast.rules.inc

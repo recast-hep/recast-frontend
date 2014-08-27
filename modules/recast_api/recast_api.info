@@ -1,0 +1,7 @@
+name = Recast API
+description = Recast API Implementation as an embedded Drupal module
+package = Recast
+core = 7.x
+
+
+files[] = recast_api.module
