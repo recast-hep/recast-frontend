@@ -52,9 +52,9 @@
       $node->field_analysis_doi[$node->language][0]['value'] = $data['doi'];
       $node->field_analysis_ownership[$node->language][0]['value'] = 0;
       $node->field_analysis_owner[$node->language][0]['value'] = '';
-      $node->field_analysis_inspire[$node->language][0]['value'] = $data['inspire_url'];
-      $node->field_analysis_eprint[$node->language][0]['value'] = $data['e_print'];
-      $node->field_analysis_description[$lang][0]['value'] = $data['description'];
+      $node->field_analysis_inspire[$node->language][0]['url'] = $data['inspire_url'];
+      $node->field_analysis_eprint[$node->language][0]['url'] = $data['e_print'];
+      $node->field_analysis_description[$node->language][0]['value'] = $data['description'];
       node_save($node);
       drupal_add_http_header('URI', $base_url . '/api/recast-analysis/' . $node->uuid);
       return $node->uuid;
