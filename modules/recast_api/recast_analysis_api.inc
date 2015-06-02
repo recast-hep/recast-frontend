@@ -156,8 +156,8 @@
             'description' => $n->field_analysis_description[$lang][0]['value'],
             'ownership' => ($n->field_analysis_ownership[$lang][0]['value'] == 0) ? t('Unowned') : t('Owned'),
             'owner' => $n->field_analysis_owner[$lang][0]['value'], 
-            'inspire' => $n->field_analysis_inspire[$lang][0]['value'], 
-            'eprint' => $n->field_analysis_eprint[$lang][0]['value'], 
+            'inspire' => $n->field_analysis_inspire[$lang][0]['url'], 
+            'eprint' => $n->field_analysis_eprint[$lang][0]['url'], 
             'created_by' => $n->name, 
               //now the following are the run conditions
             'run_conditions' => $runc
